@@ -1,0 +1,3 @@
+
+
+set(CTEST_ENVIRONMENT "HUBNA=1:8:5:2:7:3:6:4")

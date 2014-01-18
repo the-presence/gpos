@@ -1,0 +1,211 @@
+#!/bin/sh
+
+#
+# Driver script for CMake specifications
+#
+usage()
+{
+    echo "
+
+    usage: ${0##*/} [-v] [-n] [-i] [-m] [-r] [-c] [-d] [-u] [-t BUILD_TYPE]
+
+    -c              turn on CMake debugging
+    -d              Debug build
+    -i              Release build with Debug Info
+    -m              Minimum Size Release build
+    -n              don't run make, configure build structures only
+    -r              Release build (default)
+
+    -t BUILD_TYPE   set the type of builds from
+                    pc        - straight Linux build on dev PC
+                    check     - build and execute unit tests on pc
+                    coverage  - build and execute code coverage analysis on pc debug
+                    memcheck  - build and execute memory checking on pc
+                    flush     - removes all build directories
+
+    -v              turns on verbose makes
+
+"
+    exit 0
+}
+
+#
+# Default target type is "none"
+#
+TARGET="none"
+#
+# Default is to make after the cmake
+#
+DOMAKE="true"
+#
+# Default is to not run unit tests after the make
+#
+DOUNITS="false"
+#
+# Default build type is Release
+#
+BUILDTYPE=" -DCMAKE_BUILD_TYPE=Release"
+#
+# Default working subdirectory for
+# out-of-tree building
+#
+OBJECTDIR="cmake.build.area"
+#
+# Default directory for test results
+#
+TESTRESDIR="$HOME/TestResults"
+#
+# Maybe we specified something else
+#
+while getopts vnirmcudt: arg
+do
+    case $arg in
+        v)
+            VERBOSITY="-DVERBOSE_BUILD=1"
+            ;;
+        n)
+            DOMAKE="false"
+            ;;
+        d)
+            BUILDTYPE=" -DCMAKE_BUILD_TYPE=Debug"
+            ;;
+        i)
+            BUILDTYPE=" -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+            ;;
+        m)
+            BUILDTYPE=" -DCMAKE_BUILD_TYPE=MinSizeRel"
+            ;;
+        r)
+            BUILDTYPE=" -DCMAKE_BUILD_TYPE=Release"
+            # Default build type
+            ;;
+        c)
+            DEBUGINESS="-DCMAKE_SAMADHI_DEBUG_MODE=1"
+            ;;
+        t)
+            TARGET=$OPTARG
+            #
+            # Debug check
+            echo "    Building for "$TARGET
+            #
+            ;;
+    esac
+done
+
+#case ${TARGET} in ????
+#can I tidy all the subsequent logic
+#up into a case statement ????
+
+#
+# Rather than default, we force the user
+# to specify a build type
+#
+if [ $TARGET = "none" ]
+then
+    echo "TARGET: "$TARGET
+    usage
+fi
+
+#
+# A straight pc build
+#
+if [ $TARGET = "pc" ]
+then
+    CMAKE_DEFINE="-DPC=1"
+fi
+#
+# Check to see if we are cross-compiling
+#
+if [ $TARGET = "nano1" ]
+then
+    DUMMY=0
+    #CMAKE_DEFINE="-DNANO_1=1 -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-arm-buildroot-linux.cmake"
+else
+    if [ $TARGET = "nano2" ]
+    then
+        DUMMY=0
+    #    CMAKE_DEFINE="-DNANO_2=1 -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-armv7a-angstrom-linux.cmake"
+    fi
+fi
+#
+# All the targets below assume
+# that we are NOT cross-compiling
+# for these target types
+#
+if [ $TARGET = "check" ]
+then
+    CMAKE_DEFINE="-DPC=1 -DCHECK_BUILD=1"
+    DOUNITS="true"
+fi
+if [ $TARGET = "coverage" ]
+then
+    CMAKE_DEFINE="-DPC=1 -DCOVERAGE_BUILD=1"
+    BUILDTYPE=" -DCMAKE_BUILD_TYPE=Debug"
+    DOUNITS="true"
+fi
+if [ $TARGET = "memcheck" ]
+then
+    CMAKE_DEFINE="-DPC=1 -DMEMCHECK_BUILD=1"
+    DOUNITS="true"
+#????    BUILDTYPE=" -DCMAKE_BUILD_TYPE=Debug"
+fi
+#
+# Clean
+#
+if [ -d $OBJECTDIR ]
+then
+ # Smash the residue to allow different cross-compiles not to contaminate each other
+ # but without doing a flush, which destroys all the build artefacts from
+ # all previous builds
+    echo "    Removing build control structures in "$OBJECTDIR
+    rm -fr $OBJECTDIR
+fi
+#
+#
+# Always build out-of-tree
+#
+BINTREE=${PWD}"/build_output"
+OOT_BDIR="-DBDIR="$BINTREE
+echo "    Out-of-tree build into "$BINTREE
+#
+# Super clean
+#
+if [ $TARGET = "flush" ]
+then
+    echo "    Removing out-of-tree built structures in "$BINTREE
+    rm -fr $BINTREE
+    exit 0
+fi
+
+#
+# Recreate the build environment
+#
+mkdir $OBJECTDIR
+cd $OBJECTDIR
+
+echo "    Passing the following parameters to cmake: "$VERBOSITY" "$DEBUGINESS" "$OOT_BDIR" "$BUILDTYPE" "$CMAKE_DEFINE
+cmake --clean-first $VERBOSITY $DEBUGINESS $OOT_BDIR $BUILDTYPE $CMAKE_DEFINE ..
+
+if [ $DOMAKE = "true" ]
+then
+#
+# Keep it clean
+#
+    make clean
+#
+# Build it and they will compile
+#
+    make
+    if [ $DOUNITS = "true" ]
+    then
+        if [ -d $TESTRESDIR ]
+        then
+            DUMMY=0
+        else
+            mkdir $TESTRESDIR
+        fi
+        ctest
+        STAMP=`date +%Y.%m.%d-%H.%M.%S`
+        mv Testing/Temporary $TESTRESDIR/$STAMP
+    fi
+fi
