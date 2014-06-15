@@ -70,6 +70,7 @@ message(STATUS "Creating ${CMAKE_BUILD_TYPE} build")
 #
 # Where are the build artefacts going?
 #
+set(PROJECT_BINARY_DIR ${BDIR})
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 mark_as_advanced(LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH)

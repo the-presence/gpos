@@ -106,27 +106,7 @@ then
     usage
 fi
 
-#
-# A straight pc build
-#
-if [ $TARGET = "pc" ]
-then
-    CMAKE_DEFINE="-DPC=1"
-fi
-#
-# Check to see if we are cross-compiling
-#
-if [ $TARGET = "nano1" ]
-then
-    DUMMY=0
-    #CMAKE_DEFINE="-DNANO_1=1 -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-arm-buildroot-linux.cmake"
-else
-    if [ $TARGET = "nano2" ]
-    then
-        DUMMY=0
-    #    CMAKE_DEFINE="-DNANO_2=1 -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain-armv7a-angstrom-linux.cmake"
-    fi
-fi
+
 #
 # All the targets below assume
 # that we are NOT cross-compiling
@@ -134,29 +114,28 @@ fi
 #
 if [ $TARGET = "check" ]
 then
-    CMAKE_DEFINE="-DPC=1 -DCHECK_BUILD=1"
+    CMAKE_DEFINE="-DCHECK_BUILD=1"
     DOUNITS="true"
 fi
 if [ $TARGET = "coverage" ]
 then
-    CMAKE_DEFINE="-DPC=1 -DCOVERAGE_BUILD=1"
+    CMAKE_DEFINE="-DCOVERAGE_BUILD=1"
     BUILDTYPE=" -DCMAKE_BUILD_TYPE=Debug"
     DOUNITS="true"
 fi
 if [ $TARGET = "memcheck" ]
 then
-    CMAKE_DEFINE="-DPC=1 -DMEMCHECK_BUILD=1"
+    CMAKE_DEFINE="-DMEMCHECK_BUILD=1"
     DOUNITS="true"
-#????    BUILDTYPE=" -DCMAKE_BUILD_TYPE=Debug"
 fi
 #
 # Clean
 #
 if [ -d $OBJECTDIR ]
 then
- # Smash the residue to allow different cross-compiles not to contaminate each other
- # but without doing a flush, which destroys all the build artefacts from
- # all previous builds
+    # Smash the residue to allow different cross-compiles not to contaminate each other
+    # but without doing a flush, which destroys all the build artefacts from
+    # all previous builds
     echo "    Removing build control structures in "$OBJECTDIR
     rm -fr $OBJECTDIR
 fi
@@ -164,7 +143,7 @@ fi
 #
 # Always build out-of-tree
 #
-BINTREE=${PWD}"/build_output"
+BINTREE=${PWD}"/build-output"
 OOT_BDIR="-DBDIR="$BINTREE
 echo "    Out-of-tree build into "$BINTREE
 #
@@ -188,13 +167,13 @@ cmake --clean-first $VERBOSITY $DEBUGINESS $OOT_BDIR $BUILDTYPE $CMAKE_DEFINE ..
 
 if [ $DOMAKE = "true" ]
 then
-#
-# Keep it clean
-#
+    #
+    # Keep it clean
+    #
     make clean
-#
-# Build it and they will compile
-#
+    #
+    # Build it and they will compile
+    #
     make
     if [ $DOUNITS = "true" ]
     then

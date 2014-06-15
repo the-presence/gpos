@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<class>
+  <namespace>hc</namespace>
+  <name>Fred</name>
+  <depends>
+    <decl>George.H</decl>
+    <decl>iostream</decl>
+    <decl-using>std</decl-using>
+    <impl>Fred.H</impl>
+    <impl>string</impl>
+    <impl-using>std</impl-using>
+  </depends>
+  <descent>
+    <parent>
+      <name>George</name>
+    </parent>
+  </descent>
+  <interface>
+    <method pure="true" virtual="true">
+      <type></type>
+      <name>Fred</name>
+      <arglist/>
+      <implement/>
+    </method>
+    <method>
+      <type></type>
+      <name>~Fred</name>
+      <arglist/>
+      <implement>
+        <uuid>abcd</uuid>
+        <code>
+          // Test code for UUID abcd
+        </code>
+      </implement>
+    </method>
+    <method const="true" virtual="true">
+      <type>void</type>
+      <name>Method01</name>
+      <arglist>
+        <arg>
+          <type>int</type>
+          <name>arg01</name>
+        </arg>
+        <arg>
+          <type>short</type>
+          <name>arg02</name>
+        </arg>
+        <arg>
+          <type direc="ref" const="true">float</type>
+          <name>arg03</name>
+        </arg>
+      </arglist>
+      <implement>
+        <uuid>efgh</uuid>
+        <code>
+          // Test code for UUID efgh
+        </code>
+      </implement>
+    </method>
+    <method>
+      <type direc="ptr" const="true">int</type>
+      <name>Method02</name>
+      <arglist>
+        <arg>
+          <type>int</type>
+          <name>arg01</name>
+        </arg>
+        <arg>
+          <type>short</type>
+          <name>arg02</name>
+        </arg>
+        <arg>
+          <type>float</type>
+          <name>arg03</name>
+        </arg>
+      </arglist>
+      <implement>
+        <uuid>ijkl</uuid>
+        <code>
+          // Test code for UUID ijkl
+          wop = wopwop;
+          if(beauty == beast)
+          {
+          caterwaul = loudly;
+          }
+          else
+          {
+          refrain();
+          }
+        </code>
+      </implement>
+    </method>
+  </interface>
+  <state>
+    <member>
+      <type>double</type>
+      <name>Member01</name>
+    </member>
+    <member>
+      <type static="true">long</type>
+      <name>Member02</name>
+    </member>
+    <member>
+      <type>double</type>
+      <name>Member03</name>
+    </member>
+    <member>
+      <type>short</type>
+      <name>Member04</name>
+    </member>
+  </state>
+</class>
