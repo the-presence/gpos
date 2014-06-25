@@ -1,5 +1,7 @@
 #ifndef GPXMLSAXCONTENTHANDLER_H
 #define GPXMLSAXCONTENTHANDLER_H
+#include <gpxmlio/GpXmlStateMachine.hpp>
+#include <gpxmlio/GpCodeModel.hpp>
 
 #include <xercesc/sax2/Attributes.hpp>
 #include <xercesc/sax2/DefaultHandler.hpp>
@@ -8,13 +10,13 @@
 
 XERCES_CPP_NAMESPACE_USE
 
-namespace gpos
+  namespace gpos
 {
   using namespace std;
 
   class GpXmlSAXContentHandler : public DefaultHandler {
   public:
-    GpXmlSAXContentHandler();
+    GpXmlSAXContentHandler(GpCodeModel* pval);
     void startElement(const   XMLCh* const    uri,
                       const   XMLCh* const    localname,
                       const   XMLCh* const    qname,
@@ -29,7 +31,8 @@ namespace gpos
     void characters(const XMLCh* const chars,
                     const XMLSize_t len);
   private:
-    // bool isEmpty(const string& str);
+    GpXmlStateMachine statmach;
+    GpCodeModel* model;
   };
 }
 
