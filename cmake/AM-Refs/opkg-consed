@@ -1,0 +1,37 @@
+#!/bin/sh
+
+ARCHITECTURE="alertmehub"
+HUB_VERSION=0.0.1
+MULTIPLEXOR_VERSION=0.9
+
+while getopts a:h:m:i:o: arg
+do
+    case $arg in
+        a)
+            ARCHITECTURE=$OPTARG
+            ;;
+        h)
+            HUB_VERSION=$OPTARG
+            ;;
+        m)
+            MULTIPLEXOR_VERSION=$OPTARG
+            ;;
+        i)
+            INFILE=$OPTARG
+            ;;
+        o)
+            OUTFILE=$OPTARG
+            ;;
+        *)
+            echo "Invalid parameter."
+            exit 1
+            ;;
+    esac
+done
+
+DEVICE_ABSTRACTION_VERSION=$MULTIPLEXOR_VERSION
+cp $INFILE $OUTFILE
+sed -i s/DEVICE_ABSTRACTION_VERSION/$DEVICE_ABSTRACTION_VERSION/g $OUTFILE
+sed -i s/MULTIPLEXOR_VERSION/$MULTIPLEXOR_VERSION/g $OUTFILE
+sed -i s/VERSION/$HUB_VERSION/g $OUTFILE
+sed -i s/ARCHITECTURE/$ARCHITECTURE/g $OUTFILE

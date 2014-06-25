@@ -1,0 +1,23 @@
+#!/bin/sh
+
+while getopts a:o:p: arg
+do
+    case $arg in
+        a)
+            QPID_DIR=$OPTARG
+            ;;
+        o)
+            OUTFILE1=$OPTARG
+            ;;
+        p)
+            OUTFILE2=$OPTARG
+            ;;
+        *)
+            echo "Invalid parameter."
+            exit 1
+            ;;
+    esac
+done
+
+sed -i "s/\${QPID_WORK}\/\${QPID_PID_FILENAME}/\${QPID_TMP}\/\${QPID_PID_FILENAME}/" $OUTFILE1
+sed -i s/DIRECTORY/$QPID_DIR/ $OUTFILE2

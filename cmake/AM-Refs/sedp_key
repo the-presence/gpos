@@ -1,0 +1,21 @@
+#!/bin/sh
+
+ATTRIBUTE="XXXXX-DEFAULT-XXXXX"
+
+while getopts a:o: arg
+do
+    case $arg in
+        a)
+            ATTRIBUTE=$OPTARG
+            ;;
+        o)
+            OUTFILE=$OPTARG
+            ;;
+        *)
+            echo "Invalid parameter."
+            exit 1
+            ;;
+    esac
+done
+
+sed -i s/%%KEY%%/$ATTRIBUTE/ $OUTFILE

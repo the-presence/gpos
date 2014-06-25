@@ -1,0 +1,22 @@
+{
+   Suppress leak in _dl_open
+   Memcheck:Leak
+   ...
+   fun:_dl_open
+   ...
+}
+{
+   Suppress leak in _dlerror_run
+   Memcheck:Leak
+   ...
+   fun:_dlerror_run
+   ...
+}
+{
+   Suppress warning about check timer
+   Memcheck:Param
+   timer_create(evp)
+   ...
+   fun:check_get_clockid
+   ...
+}
