@@ -1,7 +1,8 @@
 #ifndef GPXMLSAXCONTENTHANDLER_H
 #include <gpxmlio/GpXmlSAXContentHandler.hpp>
 #endif
-
+#include <debug.hpp>
+#include <stdexcept>
 #include <string>
 #include <iostream>
 #include <ctype.h>
@@ -14,19 +15,23 @@ XERCES_CPP_NAMESPACE_USE
 
   GpXmlSAXContentHandler::GpXmlSAXContentHandler(GpCodeModel* val)
   {
-    model = val;
+    DEBOUT("GpXmlSAXContentHandler::GpXmlSAXContentHandler()");
+    if(!val)
+    {
+      throw std::invalid_argument("Null pointer passed to GpXmlSAXContentHandler::GpXmlSAXContentHandler()");
+    }
+    mModel = val;
+    mStateMachine.AddModel(mModel);
   }
 
-  void GpXmlSAXContentHandler::startElement(const   XMLCh* const    uri,
+  void GpXmlSAXContentHandler::startElement(const   XMLCh* const    /*uri*/,
                                             const   XMLCh* const    localname,
-                                            const   XMLCh* const    qname,
+                                            const   XMLCh* const    /*qname*/,
                                             const   Attributes&     attrs)
   {
     string elementName(XMLString::transcode(localname));
-    //statmach = FoundElement(elementName, attrs);
-    // XMLSize_t numAtts = attrs.getLength();
-    // if(numAtts > 0)
-    // {
+    mStateMachine.FoundElement(mElementMap[elementName], attrs);
+
     //   for (XMLSize_t i = 0; i < numAtts; i++)
     //   {
     //     string Qname(XMLString::transcode(attrs.getQName(i)));
@@ -40,16 +45,16 @@ XERCES_CPP_NAMESPACE_USE
 
   }
 
-  void GpXmlSAXContentHandler::endElement(const   XMLCh* const    uri,
+  void GpXmlSAXContentHandler::endElement(const   XMLCh* const    /*uri*/,
                                           const   XMLCh* const    localname,
-                                          const   XMLCh* const    qname)
+                                          const   XMLCh* const    /*qname*/)
   {
     string elementName(XMLString::transcode(localname));
-    //statmach = ClosedElement(elementName);
+    mStateMachine.ClosedElement(mElementMap[elementName]);
   }
 
   void GpXmlSAXContentHandler::characters(const XMLCh* const chars,
-                                          const XMLSize_t len)
+                                          const XMLSize_t /*len*/)
   {
     string str(XMLString::transcode(chars));
     size_t strBegin = str.find_first_not_of(" \n\r\t");
@@ -57,7 +62,7 @@ XERCES_CPP_NAMESPACE_USE
     {
       return; // no content
     }
-    statmach.ProcessChars(str);
+    mStateMachine.ProcessChars(str);
   }
 
   void GpXmlSAXContentHandler::fatalError(const SAXParseException& exception)

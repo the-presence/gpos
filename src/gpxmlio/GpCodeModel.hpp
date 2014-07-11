@@ -1,8 +1,12 @@
 #ifndef GPCODEMODEL_H
 #define GPCODEMODEL_H
 
+#include <debug.hpp>
+
 #include <gpxmlio/GpClass.hpp>
-#include <list>
+
+#include <ostream>
+#include <vector>
 
 namespace gpos
 {
@@ -12,10 +16,12 @@ namespace gpos
   {
   public:
     GpCodeModel();
+    void AddClass(GpClass*);
+    void WriteAsXml();
 
-
+    // friend ostream& operator<< (ostream& , const GpCodeModel&);
   private:
-    list<GpClass> classes;
+    vector<GpClass*> mClasses;
 
   };
 }

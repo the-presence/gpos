@@ -1,41 +1,44 @@
 #include <gpxmlio/GpXmlElementMap.hpp>
-
+#include <debug.hpp>
 namespace gpos
 {
 
   GpXmlElementMap::GpXmlElementMap()
   {
+    DEBOUT("GpXmlElementMap::GpXmlElementMap()");
     Initialise();
   }
 
   void GpXmlElementMap::Initialise()
   {
-    imap[string("class")] = CLASS;
-    imap[string("namespace")] = NAMESPACE;
-    imap[string("depends")] = DEPENDS;
-    imap[string("decl")] = DECL;
-    imap[string("decl-using")] = DECLUSING;
-    imap[string("impl")] = IMPL;
-    imap[string("impl-using")] = IMPLUSING;
-    imap[string("descent")] = DESCENT;
-    imap[string("parent")] = PARENT;
-    imap[string("name")] = NAME;
-    imap[string("interface")] = INTERFACE;
-    imap[string("method")] = METHOD;
-    imap[string("type")] = TYPE;
-    imap[string("arglist")] = ARGLIST;
-    imap[string("arg")] = ARG;
-    imap[string("implement")] = IMPLEMENT;
-    imap[string("uuid")] = UUID;
-    imap[string("code")] = CODE;
+    mImap[string("class")] = CLASS;
+    mImap[string("namespace")] = NAMESPACE;
+    mImap[string("depends")] = DEPENDS;
+    mImap[string("decl")] = DECL;
+    mImap[string("decl-using")] = DECLUSING;
+    mImap[string("impl")] = IMPL;
+    mImap[string("impl-using")] = IMPLUSING;
+    mImap[string("descent")] = DESCENT;
+    mImap[string("parent")] = PARENT;
+    mImap[string("name")] = NAME;
+    mImap[string("interface")] = INTERFACE;
+    mImap[string("method")] = METHOD;
+    mImap[string("state")] = STATE;
+    mImap[string("member")] = MEMBER;
+    mImap[string("type")] = TYPE;
+    mImap[string("arglist")] = ARGLIST;
+    mImap[string("arg")] = ARG;
+    mImap[string("implement")] = IMPLEMENT;
+    mImap[string("uuid")] = UUID;
+    mImap[string("code")] = CODE;
   }
 
   const GpElement& GpXmlElementMap::operator[](const string& ind)
   {
-    map<string, GpElement>::iterator iter = imap.find(ind);
-    if( iter != imap.end() )
+    map<string, GpElement>::iterator iter = mImap.find(ind);
+    if( iter != mImap.end() )
     {
-      return imap[ind];
+      return mImap[ind];
     }
     else
     {

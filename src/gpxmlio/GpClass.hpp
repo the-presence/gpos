@@ -1,8 +1,11 @@
 #ifndef GPCLASS_H
 #define GPCLASS_H
-
+#include <gpxmlio/GpMethod.hpp>
+#include <gpxmlio/GpMember.hpp>
+// #include <debug.hpp>
+#include <ostream>
 #include <string>
-#include <list>
+#include <vector>
 namespace gpos
 {
   using namespace std;
@@ -16,16 +19,26 @@ namespace gpos
     void Namespace(const string&);
     const string& Namespace();
 
-  private:
-    string name;
-    string nspace;
-    // list<GpMember> privateMembers;
-    // list<GpMember> publicMembers;
-    // list<GpMember> protectedMembers;
-    // list<GpMethod> privateMethods;
-    // list<GpMethod> publicMethods;
-    // list<GpMethod> protectedMethods;
+    void AddDeclDepend(const string&);
+    void AddDeclUsingDepend(const string&);
+    void AddImplDepend(const string&);
+    void AddImplUsingDepend(const string&);
+    void AddMethod(GpMethod*);
+    void AddMember(GpMember*);
 
+    void WriteAsXml();
+
+    // friend ostream& operator<< (ostream& , const GpClass&);
+
+  private:
+    string mName;
+    string mNSpace;
+    vector<string> mDeclarationDependencies;
+    vector<string> mDeclarationUsingDependencies;
+    vector<string> mImplementationDependencies;
+    vector<string> mImplementationUsingDependencies;
+    vector<GpMethod*> mInterface;
+    vector<GpMember*> mState;
   };
 }
 #endif

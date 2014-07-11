@@ -4,11 +4,13 @@
 #include <gpxmlio/GpCodeModel.hpp>
 #endif
 
+#include <debug.hpp>
+
 #include <string>
 namespace gpos
 {
   using namespace std;
-  
+
   class GpXmlReader
   {
   public:
@@ -16,7 +18,7 @@ namespace gpos
     ~GpXmlReader();
     int ReadFile(string& filename, GpCodeModel* model);
   private:
-    
+
   };
 }
 

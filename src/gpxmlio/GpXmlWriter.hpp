@@ -3,18 +3,17 @@
 #ifndef GPCODEMODEL_H
 #include <gpxmlio/GpCodeModel.hpp>
 #endif
-#include <string>
+
+#include <debug.hpp>
 namespace gpos
 {
-using namespace std;
-
   class GpXmlWriter
   {
   public:
     GpXmlWriter();
     ~GpXmlWriter();
 
-    int WriteFile(GpCodeModel* model, string& filename);
+    void WriteToFile(GpCodeModel* model);
   private:
   };
 }

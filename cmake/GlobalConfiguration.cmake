@@ -7,7 +7,7 @@ include(DebugMessage)
 # Generate lots of screen noise.
 # Use only in extremis
 #
-# set(CMAKE_VERBOSE_MAKEFILE ON)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 
 #####################################################################
 #
@@ -105,10 +105,17 @@ add_definitions(-Wall)
 add_definitions(-fPIC)
 add_definitions(-D_POSIX_SOURCE=200112L)
 add_definitions(-D_GNU_SOURCE)
+IF ((CMAKE_BUILD_TYPE STREQUAL "Debug") OR
+    (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
+  add_definitions(-ggdb)
+  add_definitions(-DDEBUG)
+ENDIF()
+
+#add_definitions(-DDEBUG)
 #add_definitions(-DHUBAPP)
 #add_definitions(-DPLATFORM_POSIX)
 #add_definitions(-DLINUX)
-# add_definitions(-Wextra)
+add_definitions(-Wextra)
 # Turn all warnings into errors - PC picohub is not (yet) warning free
 # add_definitions(-Werror)
 # Additional warnings and error checking
