@@ -8,42 +8,46 @@
 
 namespace gpos
 {
-  enum GpElement
-  {
-    NOTHING,
-    CLASS,
-    NAMESPACE,
-    DEPENDS,
-    DECL,
-    DECLUSING,
-    IMPL,
-    IMPLUSING,
-    DESCENT,
-    PARENT,
-    NAME,
-    INTERFACE,
-    METHOD,
-    STATE,
-    MEMBER,
-    TYPE,
-    ARGLIST,
-    ARG,
-    IMPLEMENT,
-    UUID,
-    CODE
-  };
+    enum GpElement
+    {
+        NOTHING,
+        CLASS,
+        NAMESPACE,
+        DEPENDS,
+        DECL,
+        DECLUSING,
+        IMPL,
+        IMPLUSING,
+        DESCENT,
+        PARENT,
+        NAME,
+        INTERFACE,
+        METHOD,
+        STATE,
+        MEMBER,
+        TYPE,
+        ARGLIST,
+        ARG,
+        IMPLEMENT,
+        UUID,
+        CODE,
+        PREAMBLEDOC,
+        POSTAMBLEDOC
+    };
 
-  using namespace std;
+    using namespace std;
 
-  class GpXmlElementMap
-  {
-  public:
+    class GpXmlElementMap
+    {
+public:
     GpXmlElementMap();
     const GpElement& operator[](const string&);
-  private:
+private:
+    //static const GpElement Nothing;
+
     void Initialise();
     map<const string, GpElement> mImap;
-  };
+    };
 
 }
 #endif

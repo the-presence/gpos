@@ -15,83 +15,83 @@
 
 XERCES_CPP_NAMESPACE_USE
 
-  namespace gpos
+namespace gpos
 {
-  using namespace std;
+    using namespace std;
 
-  GpXmlReader::GpXmlReader()
-  {
-    DEBOUT("GpXmlReader::GpXmlReader()");
-    try
+    GpXmlReader::GpXmlReader()
     {
-      XMLPlatformUtils::Initialize();
-    }
-    catch (const XMLException& toCatch)
-    {
-      char* message = XMLString::transcode(toCatch.getMessage());
-      cout << "Error during initialization! :\n";
-      cout << "Exception message is: \n"
-        << message << "\n";
-      XMLString::release(&message);
-      exit(1);
-    }
-  }
-
-  GpXmlReader::~GpXmlReader()
-  {
-    DEBOUT("GpXmlReader::~GpXmlReader()");
-    XMLPlatformUtils::Terminate();
-  }
-
-  int GpXmlReader::ReadFile(string& filename, GpCodeModel* model)
-  {
-    DEBOUT("GpXmlReader::ReadFile()");
-    SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
-    parser->setFeature(XMLUni::fgSAX2CoreValidation, true);
-    parser->setFeature(XMLUni::fgSAX2CoreNameSpaces, true);   // optional
-
-    if(!model)
-    {
-      throw std::invalid_argument("Null pointer passed to  GpXmlReader::ReadFile()");
+        DEBOUT("GpXmlReader::GpXmlReader()");
+        try
+        {
+            XMLPlatformUtils::Initialize();
+        }
+        catch (const XMLException& toCatch)
+        {
+            char* message = XMLString::transcode(toCatch.getMessage() );
+            cout << "Error during initialization! :\n";
+            cout << "Exception message is: \n"
+                 << message << "\n";
+            XMLString::release(&message);
+            exit(1);
+        }
     }
 
-    GpXmlSAXContentHandler* handler = new GpXmlSAXContentHandler(model);
-    parser->setContentHandler(handler);
-    parser->setErrorHandler(handler);
-
-    try
+    GpXmlReader::~GpXmlReader()
     {
-      parser->parse(filename.c_str());
-    }
-    catch (const XMLException& toCatch)
-    {
-      char* message = XMLString::transcode(toCatch.getMessage());
-      cout << "Exception message is: \n"
-        << message << "\n";
-      XMLString::release(&message);
-      return -1;
-    }
-    catch (const SAXParseException& toCatch)
-    {
-      char* message = XMLString::transcode(toCatch.getMessage());
-      cout << "Exception message is: \n"
-        << message << "\n";
-      XMLString::release(&message);
-      return -1;
-    }
-    catch (const std::exception& except)
-    {
-      cout << except.what() << '\n';
-      return -1;
-    }
-    catch (...)
-    {
-      cout << "Unexpected Exception \n" ;
-      return -1;
+        DEBOUT("GpXmlReader::~GpXmlReader()");
+        XMLPlatformUtils::Terminate();
     }
 
-    delete parser;
-    delete handler;
-    return 0;
-  }
+    int GpXmlReader::ReadFile(string& filename, GpCodeModel* model)
+    {
+        DEBOUT("GpXmlReader::ReadFile()");
+        SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
+        parser->setFeature(XMLUni::fgSAX2CoreValidation, true);
+        parser->setFeature(XMLUni::fgSAX2CoreNameSpaces, true); // optional
+
+        if (!model)
+        {
+            throw std::invalid_argument("Null pointer passed to  GpXmlReader::ReadFile()");
+        }
+
+        GpXmlSAXContentHandler* handler = new GpXmlSAXContentHandler(model);
+        parser->setContentHandler(handler);
+        parser->setErrorHandler(handler);
+
+        try
+        {
+            parser->parse(filename.c_str() );
+        }
+        catch (const XMLException& toCatch)
+        {
+            char* message = XMLString::transcode(toCatch.getMessage() );
+            cout << "Exception message is: \n"
+                 << message << "\n";
+            XMLString::release(&message);
+            return -1;
+        }
+        catch (const SAXParseException& toCatch)
+        {
+            char* message = XMLString::transcode(toCatch.getMessage() );
+            cout << "Exception message is: \n"
+                 << message << "\n";
+            XMLString::release(&message);
+            return -1;
+        }
+        catch (const std::exception& except)
+        {
+            cout << except.what() << '\n';
+            return -1;
+        }
+        catch (...)
+        {
+            cout << "Unexpected Exception \n";
+            return -1;
+        }
+
+        delete parser;
+        delete handler;
+        return 0;
+    }
 }

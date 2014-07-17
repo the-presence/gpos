@@ -2,6 +2,7 @@
 #define GPARGUMENT_H
 
 #include <gpxmlio/Gpos.hpp>
+#include <gpxmlio/GpType.hpp>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -15,20 +16,20 @@ namespace gpos
   {
   public:
     GpArgument();
-    bool Const();
-    void Const(bool);
-    GpDType Direc();
-    void Direc(GpDType);
-    const string& Type();
-    void Type(const string&);
+
+    GpType&       Type();
     const string& Name();
+
+    void Type(const GpType&);
     void Name(const string&);
     void WriteAsXml(ofstream&);
+    #ifdef DEBUG
+    void dump();
+    #endif
 
   private:
-    bool mConst;
-    GpDType mDirec;
-    string mType;
+
+    GpType mType;
     string mName;
   };
 }

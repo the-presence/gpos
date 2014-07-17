@@ -9,17 +9,17 @@
 #include <string>
 namespace gpos
 {
-  using namespace std;
+    using namespace std;
 
-  class GpXmlReader
-  {
-  public:
+    class GpXmlReader
+    {
+public:
     GpXmlReader();
     ~GpXmlReader();
     int ReadFile(string& filename, GpCodeModel* model);
-  private:
+private:
 
-  };
+    };
 }
 
 #endif /* GPXMLREADER_H */

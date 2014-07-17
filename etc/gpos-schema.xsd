@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:simpleType name="accesstype">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="public"/>
+      <xs:enumeration value="protected"/>
+      <xs:enumeration value="private"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="directype">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="direct"/>
+      <xs:enumeration value="ref"/>
+      <xs:enumeration value="ptr"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="name" type="xs:string"/>
+  <xs:element name="uuid" type="xs:string"/>
+  <xs:element name="code" type="xs:string"/>
+  <xs:element name="preamble-doc" type="xs:string"/>
+  <xs:element name="postamble-doc" type="xs:string"/>
+  <xs:element name="namespace" type="xs:string"/>
+  <xs:element name="decl-using" type="xs:string"/>
+  <xs:element name="impl-using" type="xs:string"/>
+
+  <xs:attribute name="access" type="accesstype"/>
+  <xs:attribute name="direc" type="directype"/>
+
+  <xs:attribute name="virtual" type="xs:boolean"/>
+  <xs:attribute name="pure" type="xs:boolean"/>
+  <xs:attribute name="const" type="xs:boolean"/>
+  <xs:attribute name="static" type="xs:boolean"/>
+  <xs:attribute name="guard" type="xs:boolean"/>
+
+  <xs:element name="decl">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute ref="guard"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="impl">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute ref="guard"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="depends">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="decl" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="decl-using" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="impl" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="impl-using" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="parent">
+    <xs:complexType>
+      <xs:all>
+        <xs:element ref="name"/>
+      </xs:all>
+      <xs:attribute ref="access"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="descent">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="parent" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="type">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute ref="const"/>
+          <xs:attribute ref="direc"/>
+          <xs:attribute ref="static"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="arg">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="type"/>
+        <xs:element ref="name"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="member">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="type"/>
+        <xs:element ref="name"/>
+      </xs:sequence>
+      <xs:attribute ref="access"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="arglist">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="arg" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="implement">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="uuid" minOccurs="0"/>
+        <xs:element ref="code" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="method">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="type"/>
+        <xs:element ref="name"/>
+        <xs:element ref="arglist" minOccurs="0"/>
+        <xs:element ref="implement" minOccurs="0"/>
+        <xs:element ref="preamble-doc" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="postamble-doc" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute ref="access"/>
+      <xs:attribute ref="virtual"/>
+      <xs:attribute ref="pure"/>
+      <xs:attribute ref="const"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="interface">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="method" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="state">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="member" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="preamble-doc" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="postamble-doc" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="class">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="namespace"/>
+        <xs:element ref="name"/>
+        <xs:element ref="depends"/>
+        <xs:element ref="descent"/>
+        <xs:element ref="interface"/>
+        <xs:element ref="state"/>
+        <xs:element ref="preamble-doc" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="postamble-doc" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

@@ -15,14 +15,21 @@ XERCES_CPP_NAMESPACE_USE
   const string GpXmlStateMachine::ConstStr = "const";
   const string GpXmlStateMachine::StaticStr = "static";
   const string GpXmlStateMachine::DirecStr = "direc";
+  const string GpXmlStateMachine::PtrStr = "ptr";
+  const string GpXmlStateMachine::RefStr = "ref";
   const string GpXmlStateMachine::VirtualStr = "virtual";
+  const string GpXmlStateMachine::AccessStr = "access";
+  const string GpXmlStateMachine::PublicStr = "public";
+  const string GpXmlStateMachine::PrivateStr = "private";
+  const string GpXmlStateMachine::ProtectedStr = "protected";
 
   GpXmlStateMachine::GpXmlStateMachine()
-    :mContext(NONE),
-       mCurrentClass(0),
-       mCurrentModel(0),
-       mCurrentMethod(0),
-       mCurrentArgument(0)
+    : mContext(NONE),
+        mCurrentClass(0),
+        mCurrentModel(0),
+        mCurrentMethod(0),
+        mCurrentArgument(0),
+        mCurrentType(0)
   {
     DEBOUT("GpXmlStateMachine::GpXmlStateMachine()");
   }
@@ -30,28 +37,37 @@ XERCES_CPP_NAMESPACE_USE
   void GpXmlStateMachine::AddModel(GpCodeModel* obj)
   {
     #ifdef DEBUG
-    cout << "GpXmlStateMachine::mCurrentModel = "<< mCurrentModel << endl;
+    cout << "GpXmlStateMachine::mCurrentModel = " << mCurrentModel << endl;
     #endif
     DEBOUT("GpXmlStateMachine::AddModel()");
-    if(!obj)
+    if (!obj)
     {
       throw std::invalid_argument("Null pointer passed to GpXmlStateMachine::AddModel");
     }
     mCurrentModel = obj;
     #ifdef DEBUG
-    cout << "GpXmlStateMachine::mCurrentModel = "<< mCurrentModel << endl;
+    cout << "GpXmlStateMachine::mCurrentModel = " << mCurrentModel << endl;
     #endif
   }
 
   bool GpXmlStateMachine::FindAttribute(MAP& attribs, const string& compstr, string& retstr)
   {
-    bool retval = false;
+    bool                retval = false;
     MAP::const_iterator search = attribs.find(compstr);
-    if(search != attribs.end())
+    #ifdef DEBUG
+    cout << "Searching for attribute: " << compstr;
+    #endif
+    if (search != attribs.end() )
     {
       retstr = attribs[compstr];
+      #ifdef DEBUG
+      cout << " Found value: " << retstr;
+      #endif
       retval = true;
     }
+    #ifdef DEBUG
+    cout << "\n";
+    #endif
     return retval;
   }
 
@@ -60,40 +76,49 @@ XERCES_CPP_NAMESPACE_USE
     mContext = val;
 
     #ifdef DEBUG
-    switch(mContext)
+    switch (mContext)
     {
       case NONE:
-        cout << "--- Context changed to: NONE\n";
+        DEBOUT("--- Context changed to: NONE\n");
         break;
       case GPCLASS:
-        cout << "--- Context changed to: GPCLASS\n";
+        DEBOUT("--- Context changed to: GPCLASS\n");
         break;
       case GPDEPENDS:
-        cout << "--- Context changed to: GPDEPENDS\n";
+        DEBOUT("--- Context changed to: GPDEPENDS\n");
         break;
       case GPINTERFACE:
-        cout << "--- Context changed to: GPINTERFACE\n";
+        DEBOUT("--- Context changed to: GPINTERFACE\n");
         break;
       case GPINHERIT:
-        cout << "--- Context changed to: GPINHERIT\n";
+        DEBOUT("--- Context changed to: GPINHERIT\n");
         break;
       case GPPARENT:
-        cout << "--- Context changed to: GPPARENT\n";
-        break;
-      case GPIMPLEMENT:
-        cout << "--- Context changed to: GPIMPLEMENT\n";
+        DEBOUT("--- Context changed to: GPPARENT\n");
         break;
       case GPMETHOD:
-        cout << "--- Context changed to: GPMETHOD\n";
+        DEBOUT("--- Context changed to: GPMETHOD\n");
+        break;
+      case GPIMPLEMENT:
+        DEBOUT("--- Context changed to: GPIMPLEMENT\n");
+        break;
+      case GPCODE:
+        DEBOUT("--- Context changed to: GPCODE\n");
+        break;
+      case GPSTATE:
+        DEBOUT("--- Context changed to: GPSTATE\n");
+        break;
+      case GPMEMBER:
+        DEBOUT("--- Context changed to: GPMEMBER\n");
         break;
       case GPARGLIST:
-        cout << "--- Context changed to: GPARGLIST\n";
+        DEBOUT("--- Context changed to: GPARGLIST\n");
         break;
       case GPARG:
-        cout << "--- Context changed to: GPARG\n";
+        DEBOUT("--- Context changed to: GPARG\n");
         break;
       default:
-        cout << "--- Context changed to: something inexplicable = "<< (int)mContext << "\n";
+        cout << "--- Context changed to: something inexplicable = " << (int)mContext << "\n";
         break;
     }
     #endif
@@ -104,32 +129,199 @@ XERCES_CPP_NAMESPACE_USE
     return mContext;
   }
 
-  void GpXmlStateMachine::FoundElement(const GpElement element, const Attributes& attrs)
-  {
 
-    XMLSize_t numAtts = attrs.getLength();
-    string retValue;
+  void GpXmlStateMachine::SetAttributes(GpType* target, const Attributes& attrs)
+  {
+    XMLSize_t           numAtts = attrs.getLength();
+    string              retValue;
 
     map<string, string> attributes;
-    if(numAtts > 0)
+    DEBOUT("GpXmlStateMachine::SetAttributes - Type");
+
+    if (numAtts > 0)
     {
       for (XMLSize_t i = 0; i < numAtts; i++)
       {
-        string local(XMLString::transcode(attrs.getLocalName(i)));
-        string value(XMLString::transcode(attrs.getValue(i)));
+        string local(XMLString::transcode(attrs.getLocalName(i) ) );
+        string value(XMLString::transcode(attrs.getValue(i) ) );
         attributes[local] = value;
         DEBOUT(i);
         DEBOUT(local);
         DEBOUT(value);
       }
+      // Checking the member for constness
+      if (FindAttribute(attributes, ConstStr, retValue) )
+      {
+        if (retValue.compare(TrueStr) == 0)
+        {
+          target->Const(true);
+        }
+      }
+      // Checking the member for staticness
+      if (FindAttribute(attributes, StaticStr, retValue) )
+      {
+        if (retValue.compare(TrueStr) == 0)
+        {
+          target->Static(true);
+        }
+      }
+      // Checking if the member is a pointer or reference
+      if (FindAttribute(attributes, DirecStr, retValue) )
+      {
+        if (retValue.compare(PtrStr) == 0)
+        {
+          target->Direc(POINTER);
+          DEBOUT("Pointer");
+        }
+        else
+        {
+          if (retValue.compare(RefStr) == 0)
+          {
+            target->Direc(REFERENCE);
+            DEBOUT("Reference");
+          }
+        }
+      }
     }
+  }
 
-    switch(element)
+  void GpXmlStateMachine::SetAttributes(GpMember* target, const Attributes& attrs)
+  {
+    XMLSize_t           numAtts = attrs.getLength();
+    string              retValue;
+
+    map<string, string> attributes;
+    DEBOUT("GpXmlStateMachine::SetAttributes - Member");
+
+    if (numAtts > 0)
+    {
+      for (XMLSize_t i = 0; i < numAtts; i++)
+      {
+        string local(XMLString::transcode(attrs.getLocalName(i) ) );
+        string value(XMLString::transcode(attrs.getValue(i) ) );
+        attributes[local] = value;
+        DEBOUT(i);
+        DEBOUT(local);
+        DEBOUT(value);
+      }
+      // Checking the member for access
+      if (FindAttribute(attributes, AccessStr, retValue) )
+      {
+        if (retValue.compare(PublicStr) == 0)
+        {
+          target->Access(PUBLIC);
+        }
+        if (retValue.compare(PrivateStr) == 0)
+        {
+          target->Access(PRIVATE);
+        }
+        if (retValue.compare(ProtectedStr) == 0)
+        {
+          target->Access(PROTECTED);
+        }
+      }
+    }
+  }
+
+  void GpXmlStateMachine::SetAttributes(GpMethod* target, const Attributes& attrs)
+  {
+    XMLSize_t           numAtts = attrs.getLength();
+    string              retValue;
+
+    map<string, string> attributes;
+    DEBOUT("GpXmlStateMachine::SetAttributes - Method");
+
+    if (numAtts > 0)
+    {
+      for (XMLSize_t i = 0; i < numAtts; i++)
+      {
+        string local(XMLString::transcode(attrs.getLocalName(i) ) );
+        string value(XMLString::transcode(attrs.getValue(i) ) );
+        attributes[local] = value;
+        DEBOUT(i);
+        DEBOUT(local);
+        DEBOUT(value);
+      }
+
+      // Checking the method for constness
+      if (FindAttribute(attributes, ConstStr, retValue) )
+      {
+        if (retValue.compare(TrueStr) == 0)
+        {
+          target->Const(true);
+        }
+      }
+      // Checking the method for runtime binding
+      if (FindAttribute(attributes, VirtualStr, retValue) )
+      {
+        if (retValue.compare(TrueStr) == 0)
+        {
+          target->Virtual(true);
+        }
+      }
+      // Checking if the method defines an abstract class
+      if (FindAttribute(attributes, PureStr, retValue) )
+      {
+        if (retValue.compare(TrueStr) == 0)
+        {
+          // Can't have a pure non-virtual
+          if (mCurrentMethod->Virtual() )
+          {
+            target->Pure(true);
+          }
+        }
+      }
+      // Checking if the method returns a pointer or reference
+      if (FindAttribute(attributes, DirecStr, retValue) )
+      {
+        if (retValue.compare(PtrStr) == 0)
+        {
+          target->Type().Direc(POINTER);
+          DEBOUT("Pointer");
+        }
+        else
+        {
+          if (retValue.compare(RefStr) == 0)
+          {
+            target->Type().Direc(REFERENCE);
+            DEBOUT("Reference");
+          }
+        }
+      }
+      // Checking the method for access
+      if (FindAttribute(attributes, AccessStr, retValue) )
+      {
+        if (retValue.compare(PublicStr) == 0)
+        {
+          target->Access(PUBLIC);
+        }
+        if (retValue.compare(PrivateStr) == 0)
+        {
+          target->Access(PRIVATE);
+        }
+        if (retValue.compare(ProtectedStr) == 0)
+        {
+          target->Access(PROTECTED);
+        }
+      }
+    }
+  }
+
+
+  void GpXmlStateMachine::FoundElement(const GpElement element, const Attributes& attrs)
+  {
+    XMLSize_t numAtts = attrs.getLength();
+
+    switch (element)
     {
       case CLASS:
-        switch(Context())
+        switch (Context() )
         {
           case NONE:
+            if (mCurrentClass)
+            {
+              delete mCurrentClass;
+            }
             mCurrentClass = new GpClass();
             mCurrentModel->AddClass(mCurrentClass);
             Context(GPCLASS);
@@ -139,7 +331,7 @@ XERCES_CPP_NAMESPACE_USE
         }
         break;
       case DEPENDS:
-        switch(Context())
+        switch (Context() )
         {
           case GPCLASS:
             Context(GPDEPENDS);
@@ -149,7 +341,7 @@ XERCES_CPP_NAMESPACE_USE
         }
         break;
       case DESCENT:
-        switch(Context())
+        switch (Context() )
         {
           case GPCLASS:
             Context(GPINHERIT);
@@ -159,7 +351,7 @@ XERCES_CPP_NAMESPACE_USE
         }
         break;
       case PARENT:
-        switch(Context())
+        switch (Context() )
         {
           case GPINHERIT:
             Context(GPPARENT);
@@ -169,7 +361,7 @@ XERCES_CPP_NAMESPACE_USE
         }
         break;
       case INTERFACE:
-        switch(Context())
+        switch (Context() )
         {
           case GPCLASS:
             Context(GPINTERFACE);
@@ -179,7 +371,7 @@ XERCES_CPP_NAMESPACE_USE
         }
         break;
       case STATE:
-        switch(Context())
+        switch (Context() )
         {
           case GPCLASS:
             Context(GPSTATE);
@@ -189,51 +381,33 @@ XERCES_CPP_NAMESPACE_USE
         }
         break;
       case MEMBER:
-        switch(Context())
+        switch (Context() )
         {
-          case GPCLASS:
+          case GPSTATE:
+            mCurrentMember = new GpMember();
+            mCurrentClass->AddMember(mCurrentMember);
+            if (numAtts > 0)
+            {
+              SetAttributes(mCurrentMember, attrs);
+            }
             Context(GPMEMBER);
-            break;
           default:
             break;
         }
         break;
       case METHOD:
-        switch(Context())
+        switch (Context() )
         {
           case GPINTERFACE:
+            if (mCurrentMethod)
+            {
+              delete mCurrentMethod;
+            }
             mCurrentMethod  = new GpMethod();
             mCurrentClass->AddMethod(mCurrentMethod);
-            if(attributes.size() > 0)
+            if (numAtts > 0)
             {
-              // Checking the method for constness
-              if(FindAttribute(attributes, ConstStr, retValue))
-              {
-                if(retValue.compare(TrueStr) == 0)
-                {
-                  mCurrentMethod->Const(true);
-                }
-              }
-              // Checking the method for runtime binding
-              if(FindAttribute(attributes, VirtualStr, retValue))
-              {
-                if(retValue.compare(TrueStr) == 0)
-                {
-                  mCurrentMethod->Virtual(true);
-                }
-              }
-              // Checking if the method defines an abstract class
-              if(FindAttribute(attributes, PureStr, retValue))
-              {
-                if(retValue.compare(TrueStr) == 0)
-                {
-                  // Can't have a pure non-virtual
-                  if(mCurrentMethod->Virtual())
-                  {
-                    mCurrentMethod->Pure(true);
-                  }
-                }
-              }
+              SetAttributes(mCurrentMethod, attrs);
             }
             Context(GPMETHOD);
             break;
@@ -242,7 +416,7 @@ XERCES_CPP_NAMESPACE_USE
         }
         break;
       case ARGLIST:
-        switch(Context())
+        switch (Context() )
         {
           case GPMETHOD:
             Context(GPARGLIST);
@@ -252,9 +426,13 @@ XERCES_CPP_NAMESPACE_USE
         }
         break;
       case ARG:
-        switch(Context())
+        switch (Context() )
         {
           case GPARGLIST:
+            if (mCurrentArgument)
+            {
+              delete mCurrentArgument;
+            }
             mCurrentArgument = new GpArgument();
             mCurrentMethod->AddArg(mCurrentArgument);
             Context(GPARG);
@@ -264,9 +442,34 @@ XERCES_CPP_NAMESPACE_USE
         }
         break;
       case TYPE:
+        if (mCurrentType)
+        {
+          delete mCurrentType;
+        }
+        mCurrentType = new GpType();
+        if (numAtts > 0)
+        {
+          SetAttributes(mCurrentType, attrs);
+        }
+        switch (Context() )
+        {
+          case GPMEMBER:
+            mCurrentMember->Type(*mCurrentType);
+            break;
+          case GPMETHOD:
+            mCurrentMethod->Type(*mCurrentType);
+            break;
+          case GPARG:
+            DUMPP(mCurrentArgument);
+            mCurrentArgument->Type(*mCurrentType);
+            DUMPP(mCurrentArgument);
+            break;
+          default:
+            break;
+        }
         break;
       case IMPLEMENT:
-        switch(Context())
+        switch (Context() )
         {
           case GPMETHOD:
             Context(GPIMPLEMENT);
@@ -274,14 +477,6 @@ XERCES_CPP_NAMESPACE_USE
           default:
             break;
         }
-        break;
-        DEBOUT(" FoundElement:IMPLEMENT");
-        break;
-      case UUID:
-        DEBOUT(" FoundElement:UUID");
-        break;
-      case CODE:
-        DEBOUT(" FoundElement:CODE");
         break;
       default:
         break;
@@ -291,63 +486,19 @@ XERCES_CPP_NAMESPACE_USE
 
   void GpXmlStateMachine::ClosedElement(const GpElement element)
   {
-    switch(element)
+    switch (element)
     {
       case CLASS:
-        switch(Context())
-        {
-          case GPCLASS:
-            Context(NONE);
-            break;
-          default:
-            break;
-        }
-        DEBOUT("ClosedElement:CLASS");
-        break;
-      case NAMESPACE:
-        DEBOUT("ClosedElement:NAMESPACE");
+        Context(NONE);
         break;
       case DEPENDS:
-        switch(Context())
-        {
-          case GPDEPENDS:
-            Context(GPCLASS);
-            DEBOUT("ClosedElement:DEPENDS");
-            break;
-          default:
-            break;
-        }
-        break;
-      case DECL:
-        DEBOUT("ClosedElement:DECL");
+        Context(GPCLASS);
         break;
       case MEMBER:
         Context(GPSTATE);
-        DEBOUT("ClosedElement:DECL");
         break;
       case STATE:
         Context(GPCLASS);
-        DEBOUT("ClosedElement:DECL");
-        break;
-      case DECLUSING:
-        DEBOUT("ClosedElement:DECLUSING");
-        break;
-      case IMPL:
-        DEBOUT("ClosedElement:IMPL");
-        break;
-      case IMPLUSING:
-        DEBOUT("ClosedElement:IMPLUSING");
-        break;
-      case NAME:
-        switch(Context())
-        {
-          case GPPARENT:
-            Context(GPINHERIT);
-            break;
-          default:
-            break;
-        }
-        break;
         break;
       case DESCENT:
         Context(GPCLASS);
@@ -357,35 +508,21 @@ XERCES_CPP_NAMESPACE_USE
         break;
       case INTERFACE:
         Context(GPCLASS);
-        DEBOUT("ClosedElement:INTERFACE");
         break;
       case METHOD:
         Context(GPINTERFACE);
-        DEBOUT("ClosedElement:METHOD");
-        break;
-      case TYPE:
-        DEBOUT("ClosedElement:TYPE");
         break;
       case ARGLIST:
         Context(GPMETHOD);
-        DEBOUT("ClosedElement:ARGLIST");
         break;
       case ARG:
         Context(GPARGLIST);
-        DEBOUT("ClosedElement:ARG");
         break;
       case IMPLEMENT:
         Context(GPMETHOD);
-        DEBOUT("ClosedElement:IMPLEMENT");
-        break;
-      case UUID:
-        DEBOUT("ClosedElement:UUID");
-        break;
-      case CODE:
-        DEBOUT("ClosedElement:CODE");
         break;
       default:
-        // Throw an exception - should never get here!
+        // Anything else is a NOP
         break;
     }
     mElementStack.pop();
@@ -395,86 +532,65 @@ XERCES_CPP_NAMESPACE_USE
   {
     GpElement eletop = mElementStack.top();
 
-    switch(eletop)
+    switch (eletop)
     {
       case CLASS:
         break;
       case NAMESPACE:
-        switch(Context())
+        switch (Context() )
         {
           case GPCLASS:
-            DEBOUT(" ProcessChars:NAMESPACE");
             mCurrentClass->Namespace(str);
-            DEBOUT(mCurrentClass->Namespace());
             break;
           default:
             break;
         }
         break;
-      case DEPENDS:
-        // DEBOUT("ProcessChars:DEPENDS");
-        break;
       case DECL:
-        // DEBOUT("ProcessChars:DECL");
-        switch(Context())
+        switch (Context() )
         {
           case GPDEPENDS:
             mCurrentClass->AddDeclDepend(str);
-            DEBOUT("ProcessChars:DECL");
             break;
           default:
             break;
         }
         break;
       case DECLUSING:
-        // DEBOUT("ProcessChars:DECLUSING");
-        switch(Context())
+        switch (Context() )
         {
           case GPDEPENDS:
             mCurrentClass->AddDeclUsingDepend(str);
-            DEBOUT("ProcessChars:DECLUSING");
             break;
           default:
             break;
         }
         break;
       case IMPL:
-        // DEBOUT("ProcessChars:IMPL");
-        switch(Context())
+        switch (Context() )
         {
           case GPDEPENDS:
             mCurrentClass->AddImplDepend(str);
-            DEBOUT("ProcessChars:IMPL");
             break;
           default:
             break;
         }
         break;
       case IMPLUSING:
-        // DEBOUT("ProcessChars:IMPLUSING");
-        switch(Context())
+        switch (Context() )
         {
           case GPDEPENDS:
             mCurrentClass->AddImplUsingDepend(str);
-            DEBOUT("ProcessChars:IMPLUSING");
             break;
           default:
             break;
         }
         break;
-      case DESCENT:
-        // DEBOUT("ProcessChars:DESCENT");
-        break;
-      case PARENT:
-        // DEBOUT("ProcessChars:PARENT");
-        break;
       case NAME:
-        switch(Context())
+        switch (Context() )
         {
           case GPCLASS:
-            DEBOUT(" ProcessChars:NAME");
             mCurrentClass->Name(str);
-            DEBOUT(mCurrentClass->Name());
             break;
           case GPMETHOD:
             mCurrentMethod->Name(str);
@@ -482,44 +598,53 @@ XERCES_CPP_NAMESPACE_USE
           case GPARG:
             mCurrentArgument->Name(str);
             break;
+          case GPMEMBER:
+            mCurrentMember->Name(str);
+            break;
           default:
             break;
         }
-        break;
-        // DEBOUT("ProcessChars:NAME");
-        break;
-      case INTERFACE:
-        // DEBOUT("ProcessChars:INTERFACE");
-        break;
-      case METHOD:
-        // DEBOUT("ProcessChars:METHOD");
         break;
       case TYPE:
-        switch(Context())
+        if (str.size() > 0)
         {
-          case GPMETHOD:
-            mCurrentMethod->Type(str);
+          switch (Context() )
+          {
+            case GPMETHOD:
+              DEBOUT("mCurrentMethod->Type().Type(str)");
+              mCurrentMethod->Type().Type(str);
+              break;
+            case GPARG:
+              DEBOUT("mCurrentArgument->Type().Type(str)");
+              mCurrentArgument->Type().Type(str);
+              break;
+            case GPMEMBER:
+              DEBOUT("mCurrentMember->Type().Type(str)");
+              mCurrentMember->Type().Type(str);
+            default:
+              break;
+          }
+        }
+        break;
+      case UUID:
+        switch (Context() )
+        {
+          case GPIMPLEMENT:
+            //mCurrentMethod->UUID(str);
             break;
-          case GPARG:
-            mCurrentArgument->Type(str);
           default:
             break;
         }
         break;
-      case ARGLIST:
-        // DEBOUT("ProcessChars:ARGLIST");
-        break;
-      case ARG:
-        // DEBOUT("ProcessChars:ARG");
-        break;
-      case IMPLEMENT:
-        // DEBOUT("ProcessChars:IMPLEMENT");
-        break;
-      case UUID:
-        // DEBOUT("ProcessChars:UUID");
-        break;
       case CODE:
-        // DEBOUT("ProcessChars:CODE");
+        switch (Context() )
+        {
+          case GPCODE:
+            //mCurrentMethod->Code(str);
+            break;
+          default:
+            break;
+        }
         break;
       default:
         // Throw an exception - should never get here!

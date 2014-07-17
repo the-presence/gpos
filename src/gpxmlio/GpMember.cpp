@@ -8,72 +8,69 @@ using namespace std;
 
 namespace gpos
 {
-  GpMember::GpMember()
-    :mConst(false),
-       mDirec(DIRECT)
-  {
-  }
-
-  bool GpMember::Const()
-  {
-    return mConst;
-  }
-  void GpMember::Const(bool val)
-  {
-    mConst = val;
-  }
-
-  GpDType GpMember::Direc()
-  {
-    return mDirec;
-  }
-  void GpMember::Direc(GpDType val)
-  {
-    mDirec = val;
-  }
-
-  const string& GpMember::Type()
-  {
-    return mType;
-  }
-
-  void GpMember::Type(const string& val)
-  {
-    mType = val;
-  }
-
-  const string& GpMember::Name()
-  {
-    return mName;
-  }
-
-  void GpMember::Name(const string& val)
-  {
-    mName = val;
-  }
-
-  void GpMember::WriteAsXml(ofstream& ofstr)
-  {
-    DEBOUT("GpMember::WriteAsXml()");
-    if(mConst)
+    GpMember::GpMember()
+        : mAccess(PRIVATE)
     {
-      ofstr << "const ";
+        DEBOUT("GpMember::GpMember");
     }
-    ofstr << mType;
-    switch(mDirec)
+
+    GpType& GpMember::Type()
     {
-      case DIRECT:
-        //ofstr << " ";
-        break;
-      case REFERENCE:
-        //ofstr << "& ";
-        break;
-      case POINTER:
-        //ofstr << "* ";
-        break;
-      default:
-        break;
+        return mType;
     }
-    ofstr << mName;
-  }
+
+    void GpMember::Type(const GpType& val)
+    {
+        mType = val;
+    }
+
+    GpAccessType GpMember::Access()
+    {
+        return mAccess;
+    }
+
+    void GpMember::Access(GpAccessType val)
+    {
+        mAccess = val;
+    }
+
+    const string& GpMember::Name()
+    {
+        return mName;
+    }
+
+    void GpMember::Name(const string& val)
+    {
+        mName = val;
+    }
+
+    void GpMember::WriteAsXml(ofstream& ofstr)
+    {
+        DEBOUT("GpMember::WriteAsXml");
+
+        ofstr << "<member";
+        switch (mAccess)
+        {
+        case PRIVATE:
+            ofstr << " access=\"private\"";
+            break;
+        case PUBLIC:
+            ofstr << " access=\"public\"";
+            break;
+        case PROTECTED:
+            ofstr << " access=\"protected\"";
+            break;
+        default:
+            break;
+        }
+        ofstr << ">\n";
+        mType.WriteAsXml(ofstr);
+        ofstr << "<name>" << Name() << "</name>\n";
+        ofstr << "</member>\n";
+
+    #ifdef DEBUG
+        cout << "<name>" << Name() << "</name>\n";
+        cout << "</member>\n";
+    #endif
+    }
 }

@@ -8,11 +8,11 @@
 #include <vector>
 namespace gpos
 {
-  using namespace std;
+    using namespace std;
 
-  class GpClass
-  {
-  public:
+    class GpClass
+    {
+public:
     GpClass();
     void Name(const string&);
     const string& Name();
@@ -30,15 +30,15 @@ namespace gpos
 
     // friend ostream& operator<< (ostream& , const GpClass&);
 
-  private:
-    string mName;
-    string mNSpace;
-    vector<string> mDeclarationDependencies;
-    vector<string> mDeclarationUsingDependencies;
-    vector<string> mImplementationDependencies;
-    vector<string> mImplementationUsingDependencies;
+private:
+    string            mName;
+    string            mNSpace;
+    vector<string>    mDeclarationDependencies;
+    vector<string>    mDeclarationUsingDependencies;
+    vector<string>    mImplementationDependencies;
+    vector<string>    mImplementationUsingDependencies;
     vector<GpMethod*> mInterface;
     vector<GpMember*> mState;
-  };
+    };
 }
 #endif

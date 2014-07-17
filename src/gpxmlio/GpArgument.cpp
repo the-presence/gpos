@@ -1,40 +1,25 @@
 #include <gpxmlio/GpArgument.hpp>
+#include <gpxmlio/GpType.hpp>
 #include <debug.hpp>
 
 namespace gpos
 {
   GpArgument::GpArgument()
-    :mConst(false),
-       mDirec(DIRECT)
   {
+    DEBOUT("GpArgument::GpArgument");
+    DUMPR(mType);
   }
 
-  bool GpArgument::Const()
-  {
-    return mConst;
-  }
-  void GpArgument::Const(bool val)
-  {
-    mConst = val;
-  }
-
-  GpDType GpArgument::Direc()
-  {
-    return mDirec;
-  }
-  void GpArgument::Direc(GpDType val)
-  {
-    mDirec = val;
-  }
-
-  const string& GpArgument::Type()
+  GpType& GpArgument::Type()
   {
     return mType;
   }
 
-  void GpArgument::Type(const string& val)
+  void GpArgument::Type(const GpType& val)
   {
+    DEBOUT("GpArgument::Type");
     mType = val;
+    DUMPR(mType);
   }
 
   const string& GpArgument::Name()
@@ -44,31 +29,28 @@ namespace gpos
 
   void GpArgument::Name(const string& val)
   {
+    DEBOUT("GpArgument::Name");
     mName = val;
+    DUMPR(mType);
   }
 
   void GpArgument::WriteAsXml(ofstream& ofstr)
   {
-    DEBOUT("GpArgument::WriteAsXml()");
-    if(mConst)
-    {
-      ofstr << "const ";
-    }
-    ofstr << mType;
-    switch(mDirec)
-    {
-      case DIRECT:
-        //ofstr << " ";
-        break;
-      case REFERENCE:
-        //ofstr << "& ";
-        break;
-      case POINTER:
-        //ofstr << "* ";
-        break;
-      default:
-        break;
-    }
-    ofstr << mName;
+    DEBOUT("GpArgument::WriteAsXml");
+    ofstr << "<arg>\n";
+    mType.WriteAsXml(ofstr);
+    ofstr << "<name>" << mName << "</name>\n";
+    ofstr << "</arg>\n";
   }
+
+  #ifdef DEBUG
+  void GpArgument::dump()
+  {
+    cout << "GpArgument :: " << this << endl;
+    cout << "      size :: " << sizeof(this) << endl;
+    cout << "     mName :: " << mName << endl;
+    cout << "     mType :: " << &mType << endl;
+  }
+  #endif
+
 }

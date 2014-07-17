@@ -9,38 +9,38 @@
 
 XERCES_CPP_NAMESPACE_USE
 
-  namespace gpos
+namespace gpos
 {
-  using namespace std;
+    using namespace std;
 
-  GpXmlWriter::GpXmlWriter()
-  {
-    try
+    GpXmlWriter::GpXmlWriter()
     {
-      XMLPlatformUtils::Initialize();
+        try
+        {
+            XMLPlatformUtils::Initialize();
+        }
+        catch (const XMLException& toCatch)
+        {
+            char* message = XMLString::transcode(toCatch.getMessage() );
+            cout << "Error during initialization! :\n";
+            cout << "Exception message is: \n"
+                 << message << "\n";
+            XMLString::release(&message);
+            exit(1);
+        }
     }
-    catch (const XMLException& toCatch)
-    {
-      char* message = XMLString::transcode(toCatch.getMessage());
-      cout << "Error during initialization! :\n";
-      cout << "Exception message is: \n"
-        << message << "\n";
-      XMLString::release(&message);
-      exit(1);
-    }
-  }
 
-  GpXmlWriter::~GpXmlWriter()
-  {
-    XMLPlatformUtils::Terminate();
-  }
-
-  void GpXmlWriter::WriteToFile(GpCodeModel* model)
-  {
-    if(!model)
+    GpXmlWriter::~GpXmlWriter()
     {
-      throw std::invalid_argument("Null pointer passed to GpXmlWriter::WriteFile()");
+        XMLPlatformUtils::Terminate();
     }
-    model->WriteAsXml();
-  }
+
+    void GpXmlWriter::WriteToFile(GpCodeModel* model)
+    {
+        if (!model)
+        {
+            throw std::invalid_argument("Null pointer passed to GpXmlWriter::WriteFile()");
+        }
+        model->WriteAsXml();
+    }
 }

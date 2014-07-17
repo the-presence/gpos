@@ -13,31 +13,31 @@
 
 XERCES_CPP_NAMESPACE_USE
 
-  namespace gpos
+namespace gpos
 {
-  using namespace std;
+    using namespace std;
 
-  class GpXmlSAXContentHandler : public DefaultHandler {
-  public:
+    class GpXmlSAXContentHandler : public DefaultHandler {
+public:
     GpXmlSAXContentHandler(GpCodeModel*);
-    void startElement(const   XMLCh* const    uri,
-                      const   XMLCh* const    localname,
-                      const   XMLCh* const    qname,
-                      const   Attributes&     attrs);
+    void startElement(const XMLCh* const uri,
+                      const XMLCh* const localname,
+                      const XMLCh* const qname,
+                      const Attributes&  attrs);
 
-    void endElement(const   XMLCh* const    uri,
-                    const   XMLCh* const    localname,
-                    const   XMLCh* const    qname);
+    void endElement(const XMLCh* const uri,
+                    const XMLCh* const localname,
+                    const XMLCh* const qname);
 
     void fatalError(const SAXParseException&);
 
     void characters(const XMLCh* const chars,
-                    const XMLSize_t len);
-  private:
+                    const XMLSize_t    len);
+private:
     GpXmlStateMachine mStateMachine;
-    GpXmlElementMap mElementMap;
-    GpCodeModel* mModel;
-  };
+    GpXmlElementMap   mElementMap;
+    GpCodeModel*      mModel;
+    };
 }
 
 #endif

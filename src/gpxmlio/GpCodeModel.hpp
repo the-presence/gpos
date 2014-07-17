@@ -10,20 +10,20 @@
 
 namespace gpos
 {
-  using namespace std;
+    using namespace std;
 
-  class GpCodeModel
-  {
-  public:
+    class GpCodeModel
+    {
+public:
     GpCodeModel();
     void AddClass(GpClass*);
     void WriteAsXml();
 
     // friend ostream& operator<< (ostream& , const GpCodeModel&);
-  private:
+private:
     vector<GpClass*> mClasses;
 
-  };
+    };
 }
 
 #endif /* GPCODEMODEL_H */

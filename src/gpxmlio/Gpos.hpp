@@ -3,12 +3,19 @@
 
 namespace gpos
 {
-  enum GpDType
-  {
-    DIRECT,
-    REFERENCE,
-    POINTER
-  };
+    enum GpDirecType
+    {
+        DIRECT,
+        REFERENCE,
+        POINTER
+    };
+
+    enum GpAccessType
+    {
+        PUBLIC,
+        PRIVATE,
+        PROTECTED
+    };
 }
 
 #endif

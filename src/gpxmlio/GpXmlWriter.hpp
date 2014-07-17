@@ -7,15 +7,15 @@
 #include <debug.hpp>
 namespace gpos
 {
-  class GpXmlWriter
-  {
-  public:
+    class GpXmlWriter
+    {
+public:
     GpXmlWriter();
     ~GpXmlWriter();
 
     void WriteToFile(GpCodeModel* model);
-  private:
-  };
+private:
+    };
 }
 
 #endif /* GPXMLWRITER_H */

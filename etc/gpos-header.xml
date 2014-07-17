@@ -1,0 +1,226 @@
+<?xml version="1.0"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+
+  <xsl:output method="text"/>
+
+  <xsl:template name="method">
+    <xsl:if test="@virtual = 'true'">
+      <xsl:text>virtual </xsl:text>
+    </xsl:if>
+    <xsl:apply-templates select="type"/>
+    <xsl:text> </xsl:text>
+    <xsl:apply-templates select="name"/>
+    <xsl:text> </xsl:text>
+    <xsl:apply-templates select="arglist"/>
+    <xsl:if test="@const = 'true'">
+      <xsl:text> const</xsl:text>
+    </xsl:if>
+    <xsl:if test="@virtual = 'true'">
+      <xsl:if test="@pure = 'true'">
+        <xsl:text> = 0</xsl:text>
+      </xsl:if>
+    </xsl:if>
+    <xsl:text>;
+    </xsl:text>
+  </xsl:template>
+
+  <xsl:template name="member">
+    <xsl:apply-templates select="type"/>
+    <xsl:text> </xsl:text>
+    <xsl:apply-templates select="name"/>
+    <xsl:text>;
+    </xsl:text>
+  </xsl:template>
+
+  <xsl:template name="arg">
+    <xsl:apply-templates select="type"/>
+    <xsl:text> </xsl:text>
+    <xsl:apply-templates select="name"/>
+  </xsl:template>
+
+  <xsl:template name="parent">
+  </xsl:template>
+
+  <xsl:template match="/">
+    <xsl:apply-templates select="class"/>
+  </xsl:template>
+
+  <xsl:template match="class">
+    <xsl:variable name="t_declg" select="name"/>
+    <xsl:variable name="declg" select="concat(translate($t_declg, 'qwertyuiopasdfghjklzxcvbnm.', 'QWERTYUIOPASDFGHJKLZXCVBNM_'),'_H')"/>
+    <xsl:text>#ifndef </xsl:text>
+    <xsl:value-of select="$declg"/>
+    <xsl:text>
+    #define </xsl:text>
+    <xsl:value-of select="$declg"/>
+    <xsl:text>
+
+    </xsl:text>
+    <xsl:apply-templates select="depends"/>
+    <xsl:text>
+    namespace </xsl:text>
+    <xsl:value-of select="namespace"/>
+    <xsl:text>
+      {
+    </xsl:text>
+    <xsl:text>class </xsl:text>
+    <xsl:value-of select="name"/>
+    <xsl:apply-templates select="descent"/>
+    <xsl:text>
+      {
+    </xsl:text>
+    <xsl:apply-templates select="interface"/>
+    <xsl:apply-templates select="state"/>
+    <xsl:text>
+    }; // </xsl:text>
+    <xsl:value-of select="name"/>
+    <xsl:text>
+    }  // </xsl:text>
+    <xsl:value-of select="namespace"/>
+    <xsl:text>
+    #endif // </xsl:text>
+    <xsl:value-of select="$declg"/>
+  </xsl:template>
+
+  <xsl:template match="depends">
+    <xsl:for-each select="decl">
+      <xsl:if test="@guard = 'true'">
+        <xsl:text>#ifdef </xsl:text>
+        <xsl:variable name="declguard" select="."/>
+        <xsl:value-of select="translate($declguard, 'qwertyuiopasdfghjklzxcvbnm.', 'QWERTYUIOPASDFGHJKLZXCVBNM_')"/>
+        <xsl:text>
+        </xsl:text>
+      </xsl:if>
+      <xsl:text>#include &lt;</xsl:text>
+      <xsl:value-of select="."/>
+      <xsl:text>&gt;
+      </xsl:text>
+      <xsl:if test="@guard = 'true'">
+        <xsl:text>#endif
+
+        </xsl:text>
+      </xsl:if>
+    </xsl:for-each>
+    <xsl:for-each select="decl-using">
+      <xsl:text>using namespace </xsl:text>
+      <xsl:value-of select="."/>
+      <xsl:text>;
+      </xsl:text>
+    </xsl:for-each>
+  </xsl:template>
+
+  <xsl:template match="descent">
+    <xsl:for-each select="parent">
+      <xsl:if test="@access = 'public'">
+        <xsl:text> : public </xsl:text>
+        <xsl:apply-templates select="name"/>
+      </xsl:if>
+    </xsl:for-each>
+    <xsl:for-each select="parent">
+      <xsl:if test="@access = 'protected'">
+        <xsl:text> : protected </xsl:text>
+        <xsl:apply-templates select="name"/>
+      </xsl:if>
+    </xsl:for-each>
+    <xsl:for-each select="parent">
+      <xsl:if test="@access = 'private'">
+        <xsl:text> : private </xsl:text>
+        <xsl:apply-templates select="name"/>
+      </xsl:if>
+    </xsl:for-each>
+  </xsl:template>
+
+  <xsl:template match="interface">
+    <xsl:text>
+      public:
+    </xsl:text>
+    <xsl:for-each select="method">
+      <xsl:if test="@access = 'public'">
+        <xsl:call-template name="method"/>
+      </xsl:if>
+    </xsl:for-each>
+    <xsl:text>
+      protected:
+    </xsl:text>
+    <xsl:for-each select="method">
+      <xsl:if test="@access = 'protected'">
+        <xsl:call-template name="method"/>
+      </xsl:if>
+    </xsl:for-each>
+    <xsl:text>
+      private:
+    </xsl:text>
+    <xsl:for-each select="method">
+      <xsl:if test="@access = 'private'">
+        <xsl:call-template name="method"/>
+      </xsl:if>
+    </xsl:for-each>
+  </xsl:template>
+
+  <xsl:template match="state">
+    <xsl:text>
+      public:
+    </xsl:text>
+    <xsl:for-each select="member">
+      <xsl:if test="@access = 'public'">
+        <xsl:call-template name="member"/>
+      </xsl:if>
+    </xsl:for-each>
+    <xsl:text>
+      protected:
+    </xsl:text>
+    <xsl:for-each select="member">
+      <xsl:if test="@access = 'protected'">
+        <xsl:call-template name="member"/>
+      </xsl:if>
+    </xsl:for-each>
+    <xsl:text>
+      private:
+    </xsl:text>
+    <xsl:for-each select="member">
+      <xsl:if test="@access = 'private'">
+        <xsl:call-template name="member"/>
+      </xsl:if>
+    </xsl:for-each>
+  </xsl:template>
+
+  <xsl:template match="arglist">
+    <xsl:text>(</xsl:text>
+    <xsl:for-each select="arg">
+      <xsl:choose>
+        <xsl:when test="position() = 1">
+          <xsl:call-template name="arg"/>
+        </xsl:when>
+        <xsl:when test="position() &gt;= 1">
+          <xsl:text>, </xsl:text>
+          <xsl:call-template name="arg"/>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:for-each>
+    <xsl:text>)</xsl:text>
+  </xsl:template>
+
+  <xsl:template match="name">
+    <xsl:value-of select="."/>
+  </xsl:template>
+
+  <xsl:template match="type">
+    <xsl:if test="@static = 'true'">
+      <xsl:text>static </xsl:text>
+    </xsl:if>
+    <xsl:if test="@volatile = 'true'">
+      <xsl:text>volatile </xsl:text>
+    </xsl:if>
+    <xsl:if test="@const = 'true'">
+      <xsl:text>const </xsl:text>
+    </xsl:if>
+    <xsl:value-of select="."/>
+    <xsl:if test="@direc = 'ref'">
+      <xsl:text>&amp;</xsl:text>
+    </xsl:if>
+    <xsl:if test="@direc = 'ptr'">
+      <xsl:text>*</xsl:text>
+    </xsl:if>
+  </xsl:template>
+
+</xsl:stylesheet>
