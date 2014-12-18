@@ -1,6 +1,17 @@
 #!/usr/bin/python
 
 from subprocess import call
+import string
+
+class Method(object):
+
+    def __init__(self):
+        return
+
+class Member(object):
+
+    def __init__(self):
+        return
 
 class Processor(object):
 
@@ -15,7 +26,9 @@ class Processor(object):
                 break
             if case('class'):
                 self.make_class()
-                self.do_format()
+                break
+            if case('member'):
+                self.make_member()
                 break
             if case():
                 print "Unknown command"
@@ -40,14 +53,14 @@ class Processor(object):
         tstr02 += '\n}\n'
         return tstr02
 
-    def create_method_decl_string(self):
+    def create_method_decl_string(self, dmethod):
         return
 
-    def create_method_impl_string(self):
+    def create_method_impl_string(self, dmethod):
         return
 
     def create_member_decl_string(self, dtype, dname):
-        dstring = ' ' + dtype + 'm_' + dname.lower() + ';\n'
+        dstring = ' ' + dtype + ' m_' + dname.lower() + ';\n'
         return dstring
 
     def do_format(self):
@@ -56,8 +69,8 @@ class Processor(object):
 
     def inject_decl(self, access, decltype, dstring):
         decl_match = access.upper() + '_' + decltype.upper() + 'S'
-        rfile = open(self.source, "r")
-        wfstr = self.source + ".new"
+        rfile = open(self.header, "r")
+        wfstr = self.header + ".new"
         wfile = open(wfstr, "w")
         for line in rfile:
             wfile.write(line)
@@ -65,12 +78,12 @@ class Processor(object):
                 wfile.write(dstring)
         rfile.close()
         wfile.close()
-        call(["rm", self.source])
-        call(["mv", wfstr, self.source])
+        call(["rm", self.header])
+        call(["mv", wfstr, self.header])
 
     def inject_impl(self, istring):
-        rfile = open(self.header, "r")
-        wfstr = self.header + ".new"
+        rfile = open(self.source, "r")
+        wfstr = self.source + ".new"
         wfile = open(wfstr, "w")
         for line in rfile:
             if (line.find('IMPL_END') != -1):
@@ -78,8 +91,8 @@ class Processor(object):
             wfile.write(line)
         rfile.close()
         wfile.close()
-        call(["rm", self.header])
-        call(["mv", wfstr, self.header])
+        call(["rm", self.source])
+        call(["mv", wfstr, self.source])
 
     def make_class(self):
         class_name = raw_input('\tClass Name : ')
@@ -91,15 +104,24 @@ class Processor(object):
         tfile02 = open(self.source, "w")
         tfile02.write(self.create_class_source_string(class_namespace))
         tfile02.close()
+        self.do_format()
 
     def make_member(self):
-        member_type = raw_input('\tMember Type')
-        member_name = raw_input('\tMember Name')
-        member_accessors = raw_input('\tPublic Accessors (y/n)?')
-        member_string = create_member_decl_string(member_type, member_name)
-        return
+        if(self.context == "undefined"):
+            return
+        member_type = raw_input('\tMember Type : ')
+        member_name_in = raw_input('\tMember Name : ')
+        member_name = member_name_in.capwords()
+        member_accessors = raw_input('\tPublic Accessors (y/n)? : ')
+        member_string = self.create_member_decl_string(member_type, member_name)
+        print member_string
+        self.inject_decl('private', 'member', member_string)
+        self.do_format()
+
 
     def make_method(self):
+        method = Method
+        method.set_name(raw_input('\tMethod Name : '))
         return
 
     def run(self):
